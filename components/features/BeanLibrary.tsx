@@ -222,7 +222,7 @@ export default function BeanLibrary({ onSelect, selectedId }: BeanLibraryProps) 
                             </span>
                         </div>
                         <div className="mt-2 text-[10px] text-gray-500 font-mono">
-                            Roast: {bean.roastDate.split('T')[0]}
+                            Roast: {bean.roastDate ? bean.roastDate.split('T')[0] : 'Unknown'}
                         </div>
                     </div>
                 ))}

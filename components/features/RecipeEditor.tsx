@@ -6,7 +6,7 @@ import { GRINDER_TABLE } from '@/utils/grinder-table';
 
 interface RecipeEditorProps {
     initialRecipe: Recipe;
-    onSave: (recipe: Recipe, scope: 'default' | 'bean') => void;
+    onSave: (recipe: Recipe, scope: 'default' | 'bean', mode: 'update' | 'create') => void;
     onCancel: () => void;
 }
 
@@ -23,7 +23,8 @@ export default function RecipeEditor({ initialRecipe, onSave, onCancel }: Recipe
             if ((e.metaKey || e.ctrlKey) && e.key === 's') {
                 e.preventDefault();
                 // Default to saving for bean for quick save
-                onSave(recipe, 'bean');
+                // Default to updating if possible, otherwise create
+                onSave(recipe, 'bean', recipe.id ? 'update' : 'create');
             }
             if (e.key === 'Escape') {
                 onCancel();
@@ -212,13 +213,23 @@ export default function RecipeEditor({ initialRecipe, onSave, onCancel }: Recipe
                     Cancel (Esc)
                 </button>
                 <div className="flex gap-4">
+                    {/* Save Changes (Update) - Only if it has an ID (existing) */}
+                    {recipe.id && (
+                        <button
+                            onClick={() => onSave(recipe, 'bean', 'update')}
+                            disabled={!isValid}
+                            className={`px-6 py-3 border text-xs uppercase tracking-[0.2em] transition-all ${isValid ? 'border-gray-600 text-gray-300 hover:border-white hover:text-white' : 'border-gray-800 text-gray-700 cursor-not-allowed'}`}
+                        >
+                            Save Changes
+                        </button>
+                    )}
+                    {/* Save as Copy (Create New) */}
                     <button
-                        onClick={() => onSave(recipe, 'bean')}
+                        onClick={() => onSave(recipe, 'bean', 'create')}
                         disabled={!isValid}
-                        className={`px-8 py-3 border text-xs uppercase tracking-[0.2em] transition-all ${isValid ? 'border-white text-white hover:bg-white hover:text-black' : 'border-gray-800 text-gray-700 cursor-not-allowed'
-                            }`}
+                        className={`px-8 py-3 border text-xs uppercase tracking-[0.2em] transition-all ${isValid ? 'border-white text-white hover:bg-white hover:text-black' : 'border-gray-800 text-gray-700 cursor-not-allowed'}`}
                     >
-                        Save as New
+                        {recipe.id ? "Save as Copy" : "Save New"}
                     </button>
                 </div>
             </div>

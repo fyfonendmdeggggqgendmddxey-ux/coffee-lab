@@ -27,33 +27,47 @@ export default function Home() {
     // Determine active recipe: Bean Override -> Custom Session Recipe -> Default
     const activeRecipe = selectedBean?.recipeOverride || customRecipe || DEFAULT_RECIPE;
 
-    const handleRecipeSave = (newRecipe: Recipe, scope: 'default' | 'bean') => {
+    const handleRecipeSave = (newRecipe: Recipe, scope: 'default' | 'bean', mode: 'update' | 'create' = 'update') => {
+        console.log("[Debug] handleRecipeSave called", { newRecipe, scope, selectedBeanId, mode });
+
+        // Generate ID:
+        // - If 'create' mode: ALWAYS allow generating a new ID (force new)
+        // - If 'update' mode: Use existing ID if present, else generate new
+        const finalRecipe = {
+            ...newRecipe,
+            id: (mode === 'create' || !newRecipe.id) ? Date.now().toString() : newRecipe.id
+        };
+
         if (scope === 'bean' && selectedBeanId) {
+            console.log("[Debug] Saving to Bean...", finalRecipe);
             const updatedBeans = beans.map(b => {
                 if (b.id === selectedBeanId) {
-                    // Logic:
-                    // 1. Always update recipeOverride to be the "Active" recipe
-                    // 2. If it has a name, ALSO add/update it in the 'recipes' list
                     let updatedRecipes = b.recipes || [];
 
-                    if (newRecipe.name && newRecipe.name.trim() !== "") {
-                        // Check if recipe with same name exists, update it. OR generate ID?
-                        // Ideally we use ID, but for now name matching or new ID.
-                        const existingIndex = updatedRecipes.findIndex(r => r.name === newRecipe.name);
-                        if (existingIndex >= 0) {
+                    if (mode === 'update') {
+                        // Update existing logic
+                        const existingIndexById = updatedRecipes.findIndex(r => r.id === finalRecipe.id);
+                        if (existingIndexById >= 0) {
+                            console.log("[Debug] Updating existing recipe by ID", existingIndexById);
                             updatedRecipes = [
-                                ...updatedRecipes.slice(0, existingIndex),
-                                newRecipe,
-                                ...updatedRecipes.slice(existingIndex + 1)
+                                ...updatedRecipes.slice(0, existingIndexById),
+                                finalRecipe,
+                                ...updatedRecipes.slice(existingIndexById + 1)
                             ];
                         } else {
-                            updatedRecipes = [...updatedRecipes, { ...newRecipe, id: Date.now().toString() }];
+                            // Fallback: If we tried to update but couldn't find it, treat as new (should rarely happen if UI is correct)
+                            console.log("[Debug] Update target not found, preventing implicit create. Just adding.");
+                            updatedRecipes = [...updatedRecipes, finalRecipe];
                         }
+                    } else {
+                        // Create mode: Always append
+                        console.log("[Debug] Creating new recipe copy");
+                        updatedRecipes = [...updatedRecipes, finalRecipe];
                     }
 
                     return {
                         ...b,
-                        recipeOverride: newRecipe,
+                        recipeOverride: finalRecipe,
                         recipes: updatedRecipes
                     };
                 }
@@ -61,13 +75,12 @@ export default function Home() {
             });
             setBeans(updatedBeans);
             localStorage.setItem('kugcc_beans', JSON.stringify(updatedBeans));
-            // Also set custom recipe to null so we use the override
+            console.log("[Debug] Bean updated and saved to localStorage");
+
             setCustomRecipe(null);
         } else {
-            // "Save Default" behavior -> Just sets session custom recipe for now, 
-            // OR we could update DEFAULT_RECIPE if we had a global store. 
-            // For this session-based app, 'default' usually meant 'not attached to bean'.
-            setCustomRecipe(newRecipe);
+            console.log("[Debug] Saving as Custom Session Recipe (Not persisted to bean)");
+            setCustomRecipe(finalRecipe);
         }
         setIsEditing(false);
     };
@@ -84,25 +97,27 @@ export default function Home() {
     };
 
     const handleToggleRecipeStar = (recipe: Recipe) => {
-        if (selectedBeanId) {
+        if (selectedBeanId && recipe.id) {
             const updatedBeans = beans.map(b => {
                 if (b.id === selectedBeanId && b.recipes) {
-                    // Toggle star for the matching recipe
                     const updatedRecipes = b.recipes.map(r => {
-                        // Match by ID if present, otherwise by Name+GrindSize+Structure or simply reference if we are lucky (but we map, so ref lost usually)
-                        // Since we are iterating the bean's own recipe list, we can rely on index matching? No, passed recipe might be from sorted list.
-                        // Best effort match: ID > Name
-                        if (r.id && r.id === recipe.id) return { ...r, isStarred: !r.isStarred };
-                        if (!r.id && r.name && r.name === recipe.name) return { ...r, isStarred: !r.isStarred };
-                        // Fallback for exactly matching object structure if needed, but Name should suffice for this scope
+                        if (r.id === recipe.id) return { ...r, isStarred: !r.isStarred };
                         return r;
                     });
-                    return { ...b, recipes: updatedRecipes };
+
+                    // Also update the override if it matches, so the UI star updates immediately if visible there
+                    const updatedOverride = (b.recipeOverride && b.recipeOverride.id === recipe.id)
+                        ? { ...b.recipeOverride, isStarred: !b.recipeOverride.isStarred }
+                        : b.recipeOverride;
+
+                    return { ...b, recipes: updatedRecipes, recipeOverride: updatedOverride };
                 }
                 return b;
             });
             setBeans(updatedBeans);
             localStorage.setItem('kugcc_beans', JSON.stringify(updatedBeans));
+        } else {
+            console.warn("[Debug] Cannot toggle star: Missing Bean ID or Recipe ID", { selectedBeanId, recipeId: recipe.id });
         }
     }
 

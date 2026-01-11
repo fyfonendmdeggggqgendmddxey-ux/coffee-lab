@@ -8,7 +8,7 @@ interface AICoachProps {
 }
 
 export default function AICoach({ bean, recipe }: AICoachProps) {
-    const adjustments = bean
+    const adjustments = (bean && bean.roastDate)
         ? getAgingAdjustments(new Date(bean.roastDate), bean.roastLevel)
         : null;
 
@@ -27,7 +27,7 @@ export default function AICoach({ bean, recipe }: AICoachProps) {
                             TARGET: <span className="text-white font-bold">{bean.name}</span>
                         </p>
                         <p className="text-[10px] text-gray-500 mt-2">
-                            ROASTED: {bean.roastDate.split('T')[0]} ({Math.floor((Date.now() - new Date(bean.roastDate).getTime()) / (1000 * 60 * 60 * 24))} Days Ago)
+                            ROASTED: {bean.roastDate ? bean.roastDate.split('T')[0] : 'Unknown'} ({bean.roastDate ? Math.floor((Date.now() - new Date(bean.roastDate).getTime()) / (1000 * 60 * 60 * 24)) : '-'} Days Ago)
                         </p>
                         <div className="mt-4 p-3 border border-gray-900 bg-gray-900/20 text-xs text-gray-400 leading-relaxed font-sans">
                             <span className="text-white block mb-1 uppercase tracking-wider text-[10px] font-mono">[COACH ADVICE]</span>

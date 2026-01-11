@@ -75,18 +75,21 @@ export default function Timer({ recipe = DEFAULT_RECIPE, onEdit }: TimerProps) {
   // Keyboard Interaction
   // Reset timer when recipe changes significantly (e.g. different bean)
   // We use a ref to track the last recipe ID to avoid resetting on minor re-renders if the object reference changes but it's the same recipe
-  const lastRecipeId = useRef(recipe.steps.map(s => s.id).join(','));
+  // Reset timer when recipe changes
+  // We track a composite key of name and step details to ensure we reset when the user loads a different recipe
+  const recipeSignature = `${recipe.id || ''}:${recipe.name || ''}:${recipe.steps.length}`;
+  const lastRecipeSig = useRef(recipeSignature);
 
   useEffect(() => {
-    const currentRecipeId = recipe.steps.map(s => s.id).join(',');
-    if (currentRecipeId !== lastRecipeId.current) {
+    // If the signature changes, it's a new recipe -> Reset everything
+    if (recipeSignature !== lastRecipeSig.current) {
       setIsRunning(false);
       setIsFinished(false);
       setCurrentStepIndex(0);
       reset();
-      lastRecipeId.current = currentRecipeId;
+      lastRecipeSig.current = recipeSignature;
     }
-  }, [recipe, reset]);
+  }, [recipeSignature, reset]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.code === 'Space') {

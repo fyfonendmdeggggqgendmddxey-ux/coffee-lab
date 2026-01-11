@@ -17,7 +17,7 @@ export default function BeanEntryModal({ onSave, onCancel, initialBean }: BeanEn
         variety: initialBean?.variety || '',
         roastLevel: initialBean?.roastLevel || 'Light',
         process: initialBean?.process || 'Washed',
-        roastDate: initialBean ? initialBean.roastDate.split('T')[0] : new Date().toISOString().split('T')[0]
+        roastDate: (initialBean && initialBean.roastDate) ? initialBean.roastDate.split('T')[0] : new Date().toISOString().split('T')[0]
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
