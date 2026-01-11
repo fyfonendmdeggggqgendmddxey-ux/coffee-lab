@@ -101,7 +101,27 @@ export default function RecipeEditor({ initialRecipe, onSave, onCancel }: Recipe
             {/* Grind Settings */}
             <div className="grid grid-cols-2 gap-12 w-full max-w-4xl mb-12">
                 <div className="flex flex-col">
-                    <label className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Grinder Model</label>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Dripper</label>
+                    <div className="relative">
+                        <input
+                            list="dripper-options"
+                            value={recipe.dripper || ""}
+                            onChange={(e) => setRecipe({ ...recipe, dripper: e.target.value })}
+                            placeholder="e.g. V60"
+                            className="bg-black border-b border-gray-800 text-white font-mono focus:outline-none focus:border-white transition-colors w-full text-xs py-2"
+                        />
+                        <datalist id="dripper-options">
+                            <option value="Hario V60" />
+                            <option value="Kalita Wave" />
+                            <option value="Origami" />
+                            <option value="Hario Switch" />
+                            <option value="Aeropress" />
+                            <option value="Chemex" />
+                            <option value="French Press" />
+                        </datalist>
+                    </div>
+                </div>
+                <div className="flex flex-col">
                     <label className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Grinder Model</label>
                     <select
                         value={recipe.grinderModel || "S3"}

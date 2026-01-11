@@ -13,6 +13,7 @@ export type Recipe = {
     temperature: number; // Celsius
     grindSize: string; // Text description
     grinderModel?: string; // e.g. "Comandante C40"
+    dripper?: string; // e.g. "V60", "Kalita"
     isStarred?: boolean; // New: Favorite status for recipe
     steps: RecipeStep[];
 };

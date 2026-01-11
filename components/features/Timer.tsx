@@ -135,9 +135,10 @@ export default function Timer({ recipe = DEFAULT_RECIPE, onEdit }: TimerProps) {
 
       {/* Grind Info (New Phase 3) */}
       <div className="absolute top-10 left-10 hidden md:block opacity-60">
-        <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Grind Setting</div>
-        <div className="text-xs text-white border-l-2 border-white pl-2">
-          {recipe.grinderModel || "Generic"} <span className="text-gray-400 mx-1">•</span> {recipe.grindSize}
+        <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Equipment</div>
+        <div className="text-xs text-white border-l-2 border-white pl-2 flex flex-col gap-1">
+          <span>{recipe.dripper || "Unknown Dripper"}</span>
+          <span className="text-gray-400 text-[10px]">{recipe.grinderModel || "Generic"} • {recipe.grindSize}</span>
         </div>
       </div>
 
@@ -200,8 +201,8 @@ export default function Timer({ recipe = DEFAULT_RECIPE, onEdit }: TimerProps) {
             if (!isFinished) setIsRunning(prev => !prev);
           }}
           className={`h-16 px-10 text-sm uppercase tracking-widest font-bold border transition-all active:scale-95 ${isRunning
-              ? "border-white text-white hover:bg-white/10"
-              : "bg-white text-black border-white hover:bg-gray-200"
+            ? "border-white text-white hover:bg-white/10"
+            : "bg-white text-black border-white hover:bg-gray-200"
             }`}
         >
           {isRunning ? 'Pause' : 'Start'}

@@ -70,7 +70,7 @@ export default function RightPanel({ bean, recipe, onLoadRecipe, onToggleStar, o
                                         </h3>
                                         <div className="text-[10px] text-gray-500 space-y-1">
                                             <p>Ratio 1:{r.ratio} • {r.temperature}°C</p>
-                                            <p>{r.grinderModel || "Generic"} • {r.grindSize}</p>
+                                            <p>{r.dripper ? `${r.dripper} • ` : ''}{r.grinderModel || "Generic"} • {r.grindSize}</p>
                                         </div>
                                     </button>
 
